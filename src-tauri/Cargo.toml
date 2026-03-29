@@ -1,0 +1,52 @@
+[package]
+name = "purgekit"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "purgekit_lib"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[dependencies]
+tauri = { version = "2", features = ["devtools"] }
+tauri-plugin-shell = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+sysinfo = "0.32"
+thiserror = "2"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-appender = "0.2"
+chrono = { version = "0.4", features = ["serde"] }
+walkdir = "2"
+directories = "5"
+nvml-wrapper = { version = "0.10", optional = true }
+
+[features]
+default = ["nvidia"]
+nvidia = ["nvml-wrapper"]
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.58", features = [
+    "Win32_UI_Shell",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_Security",
+    "Win32_System_Services",
+    "Win32_System_Threading",
+    "Win32_System_ProcessStatus",
+    "Win32_System_SystemInformation",
+    "Win32_Storage_FileSystem",
+] }
+wmi = "0.14"
+winreg = "0.52"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

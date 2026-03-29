@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Primary */
+    --color-primary: #00D4FF;
+    --color-primary-hover: #00BBEE;
+    --color-primary-active: #0099CC;
+    --color-primary-muted: rgba(0, 212, 255, 0.1);
+
+    /* Secondary */
+    --color-secondary: #7C8DB0;
+    --color-secondary-hover: #8E9DC0;
+    --color-secondary-active: #6A7DA0;
+
+    /* Accent */
+    --color-accent: #00FFE5;
+    --color-accent-glow: rgba(0, 255, 229, 0.2);
+
+    /* Backgrounds */
+    --bg-0: #07070C;
+    --bg-1: #0A0A0F;
+    --bg-2: #12121A;
+    --bg-3: #1A1A25;
+
+    /* Surface */
+    --surface: #22222E;
+    --surface-hover: #2A2A38;
+    --border-default: #2A2A38;
+    --border-active: rgba(0, 212, 255, 0.2);
+
+    /* Status */
+    --color-success: #00E676;
+    --color-warning: #FFB300;
+    --color-danger: #FF3D5A;
+    --color-info: #00D4FF;
+
+    /* Text */
+    --text-primary: #E8EAED;
+    --text-secondary: #9AA0B0;
+    --text-muted: #5A6070;
+    --text-inverse: #0A0A0F;
+    --text-link: #00D4FF;
+    --text-code: #00FFE5;
+
+    /* Font */
+    --font-sans: 'Geist Sans', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --font-mono: 'Geist Mono', 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-family: var(--font-sans);
+    background-color: var(--bg-0);
+    color: var(--text-primary);
+  }
+
+  body {
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--bg-0);
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* Allow text selection in specific areas */
+  .selectable {
+    user-select: text;
+  }
+
+  /* Scrollbar styling — thin, dark */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--surface);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--surface-hover);
+  }
+}
