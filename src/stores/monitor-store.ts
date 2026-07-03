@@ -21,17 +21,25 @@ interface TemperatureAlert {
 }
 
 const MAX_TEMP_HISTORY = 720 // 24 minutes at 2-second intervals
+const ALERT_COOLDOWN_MS = 30_000 // One alert per sensor per 30 seconds
 
-export const useMonitorStore = create<MonitorStore>((set) => ({
+export const useMonitorStore = create<MonitorStore>((set, get) => ({
   temperatureAlerts: [],
   temperatureHistory: [],
   isAlertActive: false,
 
-  addAlert: (alert) =>
-    set((state) => ({
+  addAlert: (alert) => {
+    const state = get()
+    // Deduplicate: skip if same sensor already alerted within cooldown
+    const existing = state.temperatureAlerts.find(
+      (a) => a.sensor === alert.sensor && alert.timestamp - a.timestamp < ALERT_COOLDOWN_MS,
+    )
+    if (existing) return
+    set({
       temperatureAlerts: [...state.temperatureAlerts, alert],
       isAlertActive: true,
-    })),
+    })
+  },
 
   dismissAlert: (id) =>
     set((state) => {
@@ -44,10 +52,10 @@ export const useMonitorStore = create<MonitorStore>((set) => ({
 
   pushTemperature: (reading) =>
     set((state) => {
-      const history = [...state.temperatureHistory, reading]
-      if (history.length > MAX_TEMP_HISTORY) {
-        history.shift()
-      }
+      const history =
+        state.temperatureHistory.length >= MAX_TEMP_HISTORY
+          ? [...state.temperatureHistory.slice(1), reading]
+          : [...state.temperatureHistory, reading]
       return { temperatureHistory: history }
     }),
 

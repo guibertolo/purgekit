@@ -12,7 +12,7 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use serde::Serialize;
-use sysinfo::{Components, Disks, System};
+use sysinfo::{Components, Disks, Networks, System};
 use tauri::{AppHandle, Emitter};
 
 use crate::config::AppConfig;
@@ -30,6 +30,16 @@ pub struct SystemMetrics {
     pub gpu: Option<GpuMetrics>,
     pub temperatures: ThermalMetrics,
     pub disks: Vec<DiskInfo>,
+    pub network: Vec<NetworkInfo>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct NetworkInfo {
+    pub interface_name: String,
+    pub bytes_sent: u64,
+    pub bytes_received: u64,
+    pub packets_sent: u64,
+    pub packets_received: u64,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -234,6 +244,24 @@ fn build_disk_info(disks: &Disks) -> Vec<DiskInfo> {
         .collect()
 }
 
+fn build_network_info(networks: &Networks) -> Vec<NetworkInfo> {
+    networks
+        .iter()
+        .filter(|(name, data)| {
+            // Skip loopback and virtual adapters with no traffic
+            let total = data.total_received() + data.total_transmitted();
+            !name.to_lowercase().contains("loopback") && total > 0
+        })
+        .map(|(name, data)| NetworkInfo {
+            interface_name: name.clone(),
+            bytes_sent: data.total_transmitted(),
+            bytes_received: data.total_received(),
+            packets_sent: data.total_packets_transmitted(),
+            packets_received: data.total_packets_received(),
+        })
+        .collect()
+}
+
 // ---------------------------------------------------------------------------
 // Monitor loop — runs in a dedicated OS thread
 // ---------------------------------------------------------------------------
@@ -256,6 +284,7 @@ pub fn start_monitor_loop(
         let mut sys = System::new();
         let mut components = Components::new_with_refreshed_list();
         let mut disks = Disks::new_with_refreshed_list();
+        let mut networks = Networks::new_with_refreshed_list();
 
         // Initial refresh to get baseline CPU usage (first reading is always 0)
         sys.refresh_cpu_all();
@@ -263,6 +292,7 @@ pub fn start_monitor_loop(
 
         let mut tick: u64 = 0;
         let mut cached_disks: Vec<DiskInfo> = Vec::new();
+        let mut cached_networks: Vec<NetworkInfo> = Vec::new();
 
         loop {
             let start = Instant::now();
@@ -271,12 +301,14 @@ pub fn start_monitor_loop(
             sys.refresh_cpu_all();
             sys.refresh_memory();
             components.refresh();
+            networks.refresh();
 
-            // Refresh disks every 5 ticks (~10 seconds)
+            // Refresh disks every 5 ticks (~10 seconds); networks every tick
             if tick % 5 == 0 {
                 disks.refresh();
                 cached_disks = build_disk_info(&disks);
             }
+            cached_networks = build_network_info(&networks);
 
             let cpu = build_cpu_metrics(&sys);
             let ram = build_ram_metrics(&sys);
@@ -296,6 +328,7 @@ pub fn start_monitor_loop(
                 gpu,
                 temperatures: temperatures.clone(),
                 disks: cached_disks.clone(),
+                network: cached_networks.clone(),
             };
 
             // Emit main metrics event

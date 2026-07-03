@@ -1,5 +1,6 @@
 pub mod cache_cleaner;
 pub mod dev_cleaner;
+pub mod game_watcher;
 pub mod gaming_mode;
 pub mod gpu_cache;
 pub mod service_manager;

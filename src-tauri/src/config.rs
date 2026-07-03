@@ -23,6 +23,18 @@ pub struct AppConfig {
     /// Log level filter string (e.g. "info", "debug", "warn").
     #[serde(default = "default_log_level")]
     pub log_level: String,
+
+    /// Gaming Mode: list of configured game executables.
+    #[serde(default)]
+    pub game_configs: Vec<GameConfig>,
+
+    /// Gaming Mode: default options for activation.
+    #[serde(default)]
+    pub gaming_options: GamingOptions,
+
+    /// Gaming Mode: custom list of services to disable (overrides defaults when non-empty).
+    #[serde(default)]
+    pub gaming_services_override: Vec<String>,
 }
 
 fn default_monitor_interval() -> u64 {
@@ -33,6 +45,45 @@ fn default_log_level() -> String {
     "info".to_string()
 }
 
+/// A configured game executable for auto-detection.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GameConfig {
+    /// Display name of the game.
+    pub name: String,
+    /// Full path to the game executable.
+    pub exe_path: String,
+    /// Unix timestamp of last gaming session (if any).
+    pub last_session_at: Option<i64>,
+}
+
+/// Options controlling what Gaming Mode does on activation.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GamingOptions {
+    /// Whether to clean GPU shader cache before gaming.
+    #[serde(default = "default_true")]
+    pub clean_shader_cache: bool,
+    /// Whether to flush RAM working sets.
+    #[serde(default = "default_true")]
+    pub flush_ram: bool,
+    /// Whether to disable Game DVR / Xbox Game Bar.
+    #[serde(default = "default_true")]
+    pub disable_game_dvr: bool,
+}
+
+fn default_true() -> bool {
+    true
+}
+
+impl Default for GamingOptions {
+    fn default() -> Self {
+        Self {
+            clean_shader_cache: true,
+            flush_ram: true,
+            disable_game_dvr: true,
+        }
+    }
+}
+
 impl Default for AppConfig {
     fn default() -> Self {
         Self {
@@ -41,6 +92,9 @@ impl Default for AppConfig {
             scan_paths: ScanPaths::default(),
             portable_mode: false,
             log_level: default_log_level(),
+            game_configs: Vec::new(),
+            gaming_options: GamingOptions::default(),
+            gaming_services_override: Vec::new(),
         }
     }
 }

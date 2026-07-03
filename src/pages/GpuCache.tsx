@@ -100,13 +100,15 @@ export default function GpuCache() {
   const handleCleanConfirm = useCallback(async () => {
     setShowConfirm(false)
     setCleaning(true)
-    setCleanProgress(50)
+    setCleanProgress(10)
 
     try {
       const ids = Array.from(selectedCategories)
+      setCleanProgress(30)
       const result = await invoke<GpuCleanResult>('clean_gpu_cache', {
         categories: ids,
       })
+      setCleanProgress(70)
       setCleanResult(result)
 
       if (result.cleaned_bytes > 0) {
@@ -116,6 +118,7 @@ export default function GpuCache() {
       }
 
       // Re-scan to update sizes
+      setCleanProgress(90)
       const updated = await invoke<GpuScanResult>('scan_gpu_cache', {})
       setScanResult(updated)
     } catch (err: unknown) {
@@ -346,11 +349,6 @@ export default function GpuCache() {
         />
       )}
 
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </>
   )
 }

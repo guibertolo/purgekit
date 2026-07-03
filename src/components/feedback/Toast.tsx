@@ -103,8 +103,8 @@ export default function ToastContainer() {
 
   return (
     <div
-      className="fixed bottom-4 right-4 z-50 flex flex-col gap-2"
-      style={{ pointerEvents: 'auto' }}
+      className="fixed bottom-4 right-4 flex flex-col gap-2"
+      style={{ zIndex: 60, pointerEvents: 'auto' }}
     >
       {toasts.map((toast) => (
         <ToastItem key={toast.id} toast={toast} onDismiss={handleDismiss} />

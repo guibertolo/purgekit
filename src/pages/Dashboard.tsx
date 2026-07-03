@@ -1,4 +1,4 @@
-import { LayoutDashboard, Cpu, HardDrive, Thermometer } from 'lucide-react'
+import { LayoutDashboard, Cpu, HardDrive, Thermometer, Wifi } from 'lucide-react'
 import { LineChart, Line, YAxis, ResponsiveContainer } from 'recharts'
 import Header from '@/components/layout/Header'
 import AlertBanner from '@/components/feedback/AlertBanner'
@@ -11,6 +11,7 @@ import type {
   RamMetrics,
   GpuMetrics,
   DiskMetrics,
+  NetworkMetrics,
   TemperatureMetrics,
   TimestampedValue,
 } from '@/types/metrics'
@@ -64,6 +65,11 @@ export default function Dashboard() {
 
             {/* Row 3: Disks */}
             <DiskSection disks={latest.disks} />
+
+            {/* Row 4: Network */}
+            {latest.network && latest.network.length > 0 && (
+              <NetworkSection interfaces={latest.network} />
+            )}
           </div>
         )}
       </div>
@@ -110,9 +116,12 @@ function SkeletonCard() {
         style={{ backgroundColor: 'var(--border-default)' }}
       />
       <div
-        className="h-3 w-32 rounded"
-        style={{ backgroundColor: 'var(--border-subtle)' }}
+        className="h-3 w-32 rounded mb-4"
+        style={{ backgroundColor: 'var(--border-default)' }}
       />
+      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+        Loading system metrics...
+      </p>
     </div>
   )
 }
@@ -412,6 +421,55 @@ function DiskRow({ disk }: { disk: DiskMetrics }) {
         </span>
       </div>
       <UsageBar percent={disk.usage_percent} color={color} />
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Network Section
+// ---------------------------------------------------------------------------
+
+interface NetworkSectionProps {
+  interfaces: NetworkMetrics[]
+}
+
+function NetworkSection({ interfaces }: NetworkSectionProps) {
+  if (interfaces.length === 0) return null
+
+  return (
+    <MetricCard title="Network" icon={<Wifi size={14} />}>
+      <div className="flex flex-col gap-2">
+        {interfaces.map((iface) => (
+          <NetworkRow key={iface.interface_name} iface={iface} />
+        ))}
+      </div>
+    </MetricCard>
+  )
+}
+
+function NetworkRow({ iface }: { iface: NetworkMetrics }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span
+        className="text-xs truncate max-w-[200px]"
+        style={{ color: 'var(--text-secondary)' }}
+      >
+        {iface.interface_name}
+      </span>
+      <div className="flex items-center gap-4">
+        <span
+          className="text-xs"
+          style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
+        >
+          {formatBytes(iface.bytes_sent, 1)} sent
+        </span>
+        <span
+          className="text-xs"
+          style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
+        >
+          {formatBytes(iface.bytes_received, 1)} recv
+        </span>
+      </div>
     </div>
   )
 }

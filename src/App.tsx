@@ -9,6 +9,8 @@ import DeveloperMode from '@/pages/DeveloperMode'
 import GamingMode from '@/pages/GamingMode'
 import SystemMonitor from '@/pages/SystemMonitor'
 import Settings from '@/pages/Settings'
+import ServiceManager from '@/pages/ServiceManager'
+import StartupManager from '@/pages/StartupManager'
 import { useSessionRestore } from '@/hooks/useSessionRestore'
 import { useElevationDialog } from '@/hooks/useElevationDialog'
 
@@ -22,6 +24,8 @@ const ROUTES: Record<string, () => JSX.Element> = {
   '/developer': DeveloperMode,
   '/gaming': GamingMode,
   '/monitor': SystemMonitor,
+  '/services': ServiceManager,
+  '/startup': StartupManager,
   '/settings': Settings,
 }
 

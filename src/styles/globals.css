@@ -97,3 +97,10 @@
     background: var(--surface-hover);
   }
 }
+
+/* Shared spinner animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

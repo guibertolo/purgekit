@@ -292,12 +292,6 @@ export default function CacheCleaner() {
         />
       )}
 
-      {/* Spinner keyframes */}
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </>
   )
 }

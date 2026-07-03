@@ -82,42 +82,62 @@ export interface GpuCleanResult {
   first_load_slower_warning: boolean
 }
 
-/** Developer mode cache types */
+/** Developer mode cache types — mirrors Rust modules/dev_cleaner.rs */
 
 export interface DevToolInfo {
+  id: string
   name: string
-  tool_type: DevToolType
-  path: string
-  cache_size_bytes: number
+  detected: boolean
+  version: string | null
+  cache_paths: string[]
 }
 
-export type DevToolType =
-  | 'NodeNpm'
-  | 'NodeYarn'
-  | 'NodePnpm'
-  | 'Python'
-  | 'Rust'
-  | 'Go'
-  | 'Docker'
-  | 'Gradle'
-  | 'Maven'
-  | 'NuGet'
-  | 'Wsl'
+export type NodeModulesStatus =
+  | 'Active'
+  | { Inactive: { days_old: number } }
+  | 'Orphan'
 
-export interface DevScanResult {
-  tools: DevToolInfo[]
-  orphan_node_modules: OrphanNodeModules[]
-  total_size_bytes: number
-}
-
-export interface OrphanNodeModules {
+export interface NodeModulesEntry {
   path: string
+  parent_path: string
   size_bytes: number
   last_modified: number
-  parent_has_lockfile: boolean
+  has_package_json: boolean
+  status: NodeModulesStatus
+  selected: boolean
 }
 
-export type DevCacheTarget = {
-  tool_type: DevToolType
-  path: string
+export interface DevScanProgress {
+  scanned_dirs: number
+  found_count: number
+}
+
+export interface DevCacheCategory {
+  id: string
+  tool: string
+  name: string
+  paths: string[]
+  size_bytes: number
+  available: boolean
+  requires_docker_running: boolean
+}
+
+export interface DevCleanResult {
+  tool: string
+  freed_bytes: number
+  items_removed: number
+  command_output: string | null
+}
+
+export interface DockerPruneResult {
+  success: boolean
+  output: string
+  freed_bytes: number
+}
+
+export interface Wsl2DistroInfo {
+  name: string
+  vhdx_path: string
+  vhdx_size_bytes: number
+  status: string
 }

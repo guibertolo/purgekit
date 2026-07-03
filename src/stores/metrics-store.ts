@@ -73,9 +73,9 @@ function appendCapped(
   history: TimestampedValue[],
   entry: TimestampedValue,
 ): TimestampedValue[] {
-  const next = [...history, entry]
-  if (next.length > MAX_HISTORY) {
-    return next.slice(next.length - MAX_HISTORY)
+  if (history.length >= MAX_HISTORY) {
+    // Avoid full array copy: slice from 1 and append
+    return [...history.slice(1), entry]
   }
-  return next
+  return [...history, entry]
 }
